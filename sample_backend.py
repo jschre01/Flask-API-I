@@ -1,21 +1,39 @@
 from flask import Flask
 from flask import request
+from flask import jsonify
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
    return 'Hello, World!'
 
-@app.route('/users')
+@app.route('/users', methods=['GET', 'POST'])
 def get_users():
-   search_username = request.args.get('name') 
-   if search_username :
-      subdict = {'users_list' : []}
+   if request.method == 'GET':
+      search_username = request.args.get('name') 
+      if search_username :
+         subdict = {'users_list' : []}
+         for user in users['users_list']:
+            if user['name'] == search_username:
+               subdict['users_list'].append(user)
+         return subdict
+      return users
+   elif request.method == 'POST':
+      userToAdd = request.get_json()
+      users['users_list'].append(userToAdd)
+      resp = jsonify(success=True)
+      #resp.status_code = 200
+      return resp
+
+@app.route('/users/<id>')
+def get_user(id):
+   if id :
       for user in users['users_list']:
-         if user['name'] == search_username:
-            subdict['users_list'].append(user)
-      return subdict
+         if user['id'] == id:
+            return user
+      return ({})
    return users
+
 
 users = { 
    'users_list' :
