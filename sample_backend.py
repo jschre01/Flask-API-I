@@ -2,6 +2,8 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from flask_cors import CORS
+import string
+import random
 app = Flask(__name__)
 CORS(app)
 
@@ -28,9 +30,12 @@ def get_users():
       return users
    elif request.method == 'POST':
       userToAdd = request.get_json()
+      if not request.args.get('id'):
+         newID = generateID()
+         userToAdd['id'] = newID
       users['users_list'].append(userToAdd)
-      resp = jsonify(success=True)
-      #resp.status_code = 200
+      resp = jsonify(userToAdd)
+      resp.status_code = 201
       return resp
 
 @app.route('/users/<id>', methods=['GET', 'DELETE'])
@@ -51,6 +56,16 @@ def get_user(id):
                return resp
          return users
 
+def generateID():
+   id = ''
+   for i in range(3):
+      id = id + random.choice(string.ascii_lowercase)
+   for i in range(3):
+      id = id + str(random.randint(0,9))
+   for user in users['users_list']:
+      if user['id'] == id:
+         return generateID()
+   return id
 
 users = { 
    'users_list' :
